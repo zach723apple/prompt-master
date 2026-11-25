@@ -1,0 +1,5 @@
+{
+  "name": "prompt-master",
+  "owner": { "name": "zach723apple" },
+  "plugins": [{ "name": "prompt-master", "source": "./" }]
+}

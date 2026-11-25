@@ -1,0 +1,10 @@
+{
+  "name": "prompt-master",
+  "version": "0.1.0",
+  "description": "Prompt Master button: rewrites your draft into a clearer prompt (fixes typos, keeps your meaning) for you to check before sending",
+  "types": "./types/index.d.ts",
+  "license": "MIT",
+  "author": {
+    "name": "zach723apple"
+  }
+}
