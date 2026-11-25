@@ -9,7 +9,7 @@ The rewrite is one Sonnet call through your own Claude Code session, so it count
 In Claude Code, type at the prompt:
 
 ```
-/plugin install prompt-master --marketplace zach723apple/prompt-master
+/plugin install prompt-master-button --marketplace zach723apple/prompt-master
 ```
 
 Answer `y` to add the marketplace, then pick a scope (user scope puts it in every session).

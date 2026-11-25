@@ -3,9 +3,9 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import type { Status } from '../types'
 
-const status = atom({ plugin: 'prompt-master', key: 'status' } as const, 'idle' as Status)
-const original = atom({ plugin: 'prompt-master', key: 'original' } as const, null as string | null)
-const message = atom({ plugin: 'prompt-master', key: 'message' } as const, '')
+const status = atom({ plugin: 'prompt-master-button', key: 'status' } as const, 'idle' as Status)
+const original = atom({ plugin: 'prompt-master-button', key: 'original' } as const, null as string | null)
+const message = atom({ plugin: 'prompt-master-button', key: 'message' } as const, '')
 
 const SYSTEM = `You are Prompt Master. You rewrite a person's rough draft of a message to an AI assistant so the assistant understands it on the first try.
 
@@ -71,13 +71,13 @@ async function undo($: EngineInterface) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
-      name: 'prompt-master',
+      name: 'prompt-master-button',
       description: 'Rewrite the draft in the prompt box into a clearer prompt',
     })
     return next(e)
   })
 
-  on('command.run', { command: 'prompt-master' }, async () => {
+  on('command.run', { command: 'prompt-master-button' }, async () => {
     return { text: 'Type your prompt in the box, then press the Prompt Master button above it.' }
   })
 

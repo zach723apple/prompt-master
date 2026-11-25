@@ -1,5 +1,5 @@
 {
-  "name": "prompt-master",
+  "name": "prompt-master-button",
   "version": "0.1.0",
   "description": "Prompt Master button: rewrites your draft into a clearer prompt (fixes typos, keeps your meaning) for you to check before sending",
   "types": "./types/index.d.ts",

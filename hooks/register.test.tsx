@@ -1,7 +1,7 @@
 import { expect, test } from 'claude-code/testing'
 
 const BAND = {
-  plugin: 'prompt-master',
+  plugin: 'prompt-master-button',
   component: 'AbovePrompt',
   props: { hasSurvey: false, isCollapsed: false, isWorking: false, maxRows: 10, bodyColumns: 80, scroll: { offset: 0, bodyRows: 10 } },
 } as const
