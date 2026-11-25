@@ -40,3 +40,13 @@ test('an empty box is not sent to the model', async ($, on) => {
   expect(called).toBe(false)
   await ui.unmount()
 })
+
+test('/prompt-master-button <text> rewrites into the box', async ($, on) => {
+  let box = ''
+  on('model.complete', () => ({ value: { isAnswered: true, text: 'Clean prompt.', usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } } }))
+  on('prompt.fill', (_, e) => { box = e.text; return { isFilled: true, box: { text: box, cursor: box.length } } })
+  on('command.run', () => ({ text: 'engine' }))
+  const r = await $.command.run({ command: 'prompt-master-button', args: 'mesy promt' } as never)
+  expect(box).toBe('Clean prompt.')
+  expect(r.text).toContain('message box')
+})

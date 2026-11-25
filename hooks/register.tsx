@@ -21,6 +21,19 @@ Rules:
 
 Reply with the rewritten prompt only.`
 
+async function improve($: EngineInterface, draft: string): Promise<{ text?: string; error?: string }> {
+  const r = await $.model.complete({
+    model: 'sonnet',
+    system: SYSTEM,
+    prompt: `Rewrite this draft:\n\n<draft>\n${draft}\n</draft>`,
+    maxTokens: 2048,
+    effort: 'low',
+    timeoutMs: 45000,
+  })
+  if (!r.isAnswered || !r.text.trim()) return { error: r.isAnswered ? 'empty reply' : r.reason }
+  return { text: r.text.trim().replace(/^<draft>\s*|\s*<\/draft>$/g, '') }
+}
+
 async function rewrite($: EngineInterface) {
   if ((await read($, status)) === 'working') return
   const box = await $.prompt.read()
@@ -30,17 +43,10 @@ async function rewrite($: EngineInterface) {
     return
   }
   await update($, status, () => 'working' as Status)
-  const r = await $.model.complete({
-    model: 'sonnet',
-    system: SYSTEM,
-    prompt: `Rewrite this draft:\n\n<draft>\n${draft}\n</draft>`,
-    maxTokens: 2048,
-    effort: 'low',
-    timeoutMs: 45000,
-  })
-  if (!r.isAnswered || !r.text.trim()) {
+  const r = await improve($, draft)
+  if (r.error !== undefined || r.text === undefined) {
     await update($, status, () => 'error' as Status)
-    await update($, message, () => (r.isAnswered ? 'empty reply' : r.reason))
+    await update($, message, () => r.error ?? 'no reply')
     return
   }
   const now = await $.prompt.read()
@@ -49,7 +55,7 @@ async function rewrite($: EngineInterface) {
     await update($, message, () => 'you edited the draft while it was rewriting, press again')
     return
   }
-  const better = r.text.trim().replace(/^<draft>\s*|\s*<\/draft>$/g, '')
+  const better = r.text
   const filled = await $.prompt.fill({ text: better, mode: 'replace' })
   if (!filled.isFilled) {
     await update($, status, () => 'error' as Status)
@@ -72,13 +78,27 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'prompt-master-button',
-      description: 'Rewrite the draft in the prompt box into a clearer prompt',
+      description: 'Rewrite a prompt into a clearer one: /prompt-master-button <your prompt>',
     })
     return next(e)
   })
 
-  on('command.run', { command: 'prompt-master-button' }, async () => {
-    return { text: 'Type your prompt in the box, then press the Prompt Master button above it.' }
+  // Works on every surface, even where the button is not drawn:
+  // /prompt-master-button <your messy prompt>
+  on('command.run', { command: 'prompt-master-button' }, async ($, e) => {
+    const draft = e.args.trim()
+    if (!draft) {
+      return { text: 'Type /prompt-master-button followed by your prompt, or press the Prompt Master button above the box.' }
+    }
+    const r = await improve($, draft)
+    if (r.text === undefined) return { text: `Could not rewrite: ${r.error}` }
+    const filled = await $.prompt.fill({ text: r.text, mode: 'replace' })
+    if (filled.isFilled) {
+      await update($, original, () => draft)
+      await update($, status, () => 'done' as Status)
+      return { text: 'Rewritten prompt is in your message box. Check it, edit if needed, then send.' }
+    }
+    return { text: `Rewritten prompt (copy it):\n\n${r.text}` }
   })
 
   // A new prompt sent: forget the undo copy.
